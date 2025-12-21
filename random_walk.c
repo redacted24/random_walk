@@ -1,4 +1,6 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_video.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,11 +21,20 @@ int main(int argc, const char *argv[]) {
   }
 
   // Create window
-  SDL_Window *win = SDL_CreateWindow("Random walk", SDL_WINDOWPOS_CENTERED,
-                                     SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
-  SDL_Renderer *renderer = SDL_CreateRenderer(win, -1, 0);
+  SDL_Window *pwindow =
+      SDL_CreateWindow("Random walk", SDL_WINDOWPOS_CENTERED,
+                       SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
+  SDL_Renderer *renderer = SDL_CreateRenderer(pwindow, -1, 0);
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
+
+  // Create rect
+  SDL_Rect rect = (SDL_Rect){50, 50, 50, 50};
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderFillRect(renderer, &rect);
+
+  printf("%s\n", SDL_GetError());
+
   SDL_RenderPresent(renderer);
 
   int app_running = 1;
