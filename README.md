@@ -91,6 +91,17 @@ SDL has migrated to SDL3, but lacks documentation. This is why I still chose to 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-`./random_walk.out <num-of-walks>`
+For 15 simultaneous walks:
+<br>
+```sh
+./random-walk.out
+```
+<br>
+
+For n number of walks:
+
+```sh
+./random_walk.out <n>
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
