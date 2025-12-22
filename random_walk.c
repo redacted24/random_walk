@@ -16,25 +16,81 @@ typedef struct {
   SDL_Color color;
 } Node;
 
+typedef struct {
+  int h;
+  int s;
+  int v;
+} HSV;
+
+// Converts HSV to RGB. Better for picking "good" colors.
+// Based on the color conversion formulae given by Wikipedia:
+// https://en.wikipedia.org/wiki/HSL_and_HSV#Color_conversion_formulae
+SDL_Color hsv2rgb(int hue, double saturation, double lightness) {
+  double chroma = (1 - fabs(2.0 * lightness - 1)) * saturation;
+  printf("chroma: %f\n", chroma);
+  double hue_prime = (double)hue / 60;
+  printf("hueprime: %f\n", hue_prime);
+  double x = chroma * (1 - fabs(fmod(hue_prime, 2) - 1));
+  printf("x: %f\n", x);
+  double m = lightness - (chroma / 2);
+  printf("m: %f\n", m);
+
+  double r1 = 0, g1 = 0, b1 = 0;
+  if (0 <= hue_prime && hue_prime < 1) {
+    r1 = chroma;
+    g1 = x;
+    b1 = 0;
+  } else if (1 <= hue_prime && hue_prime < 2) {
+    r1 = x;
+    g1 = chroma;
+    b1 = 0;
+  } else if (2 <= hue_prime && hue_prime < 3) {
+    r1 = 0;
+    g1 = chroma;
+    b1 = x;
+  } else if (3 <= hue_prime && hue_prime < 4) {
+    r1 = 0;
+    g1 = x;
+    b1 = chroma;
+  } else if (4 <= hue_prime && hue_prime < 5) {
+    r1 = x;
+    g1 = 0;
+    b1 = chroma;
+  } else if (5 <= hue_prime && hue_prime < 6) {
+    r1 = chroma;
+    g1 = 0;
+    b1 = x;
+  }
+
+  int r = (r1 + m) * 255;
+  int g = (g1 + m) * 255;
+  int b = (b1 + m) * 255;
+
+  printf("end colors: %d, %d, %d\n", r, g, b);
+  printf("prime colors: %f, %f, %f\n", r1, g1, b1);
+  SDL_Color color = {r, g, b, 255};
+  return color;
+}
+
 // Generates a random double between 0 and 1.
 double gen_rand_double() { return (double)rand() / RAND_MAX; }
 
 // Generates a random integer representing a direction for a node to take, based
 // on a random double value.
-// 1: North
-// -1 : South
+// 0: North
+// 1 : South
 // 2: East
-// -2: West
+// 3: West
 int gen_rand_direction() {
   double random_value = gen_rand_double();
   if (random_value < 0.25) {
-    return 1;
+    return 0;
   } else if (random_value < 0.5) {
-    return -1;
+    return 1;
   } else if (random_value < 0.75) {
     return 2;
   } else {
-    return -2;
+    return 3;
   }
 }
 
@@ -43,9 +99,13 @@ int main(int argc, const char *argv[]) {
   int num_node;
 
   if (argc == 1) {
-    num_node = 5;
+    num_node = 15;
   } else if (argc == 2) {
     num_node = atoi(argv[1]);
+    if (num_node == 0) {
+      printf("0 nodes. Exiting\n");
+      return 0;
+    }
   } else {
     printf("Usage: %s <num-of-nodes>\n", argv[0]);
     return 1;
@@ -62,22 +122,24 @@ int main(int argc, const char *argv[]) {
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
 
-  // Variables for Rect position
-  SDL_Rect rect = (SDL_Rect){WIDTH / 2, HEIGHT / 2, 2, 2};
-
   // Some variables to initialize before main loop
   int app_running = 1;
   int direction = 0;
   int min_travel_distance = MIN_TRAVEL_DISTANCE;
 
+  // Create new nodes, change colors based on number of active node
+  int hue = 0;
+  int colors = 360 / num_node;
   for (int i = 0; i < num_node; i++) {
-    Node new_node = {gen_rand_direction(),
-                     {WIDTH / 2, HEIGHT / 2, 2, 2},
-                     {255, 255, 255, 255}};
+    SDL_Color rand_color = hsv2rgb(hue, 0.5, 0.5);
+    hue += colors;
+
+    Node new_node = {
+        gen_rand_direction(), {WIDTH / 2, HEIGHT / 2, 2, 2}, rand_color};
     node_list[i] = new_node;
   }
 
-  // Main loop
+  // Core loop
   while (app_running) {
     // event handling
     SDL_Event event;
@@ -87,25 +149,27 @@ int main(int argc, const char *argv[]) {
       }
     }
 
-    // Core loop
+    // Logic
     if (min_travel_distance <= 0) {
       min_travel_distance = MIN_TRAVEL_DISTANCE;
     }
 
+    // Determine direction change
     if (rand() % 2 == 0 && min_travel_distance == MIN_TRAVEL_DISTANCE) {
       for (int i = 0; i < num_node; i++) {
         node_list[i].direction = gen_rand_direction();
       }
     }
+
     for (int i = 0; i < num_node; i++) {
       direction = node_list[i].direction;
-      if (direction == 1) {
+      if (direction == 0) {
         node_list[i].rect.y--;
-      } else if (direction == -2) {
+      } else if (direction == 1) {
         node_list[i].rect.x--;
-      } else if (direction == -1) {
-        node_list[i].rect.y++;
       } else if (direction == 2) {
+        node_list[i].rect.y++;
+      } else if (direction == 3) {
         node_list[i].rect.x++;
       }
     }
@@ -122,7 +186,7 @@ int main(int argc, const char *argv[]) {
 
     // Update renderer, and frame related stuff
     SDL_RenderPresent(renderer);
-    SDL_Delay(17);
+    SDL_Delay(8);
   }
   return 0;
 }
