@@ -8,7 +8,7 @@
 
 #define WIDTH 900
 #define HEIGHT 600
-#define MIN_TRAVEL_TIME 10
+#define MIN_TRAVEL_DISTANCE 5
 
 // Generates a random double between 0 and 1.
 double gen_rand_double() { return (double)rand() / RAND_MAX; }
@@ -60,7 +60,7 @@ int main(int argc, const char *argv[]) {
   // Some variables to initialize before main loop
   int app_running = 1;
   int direction = 0;
-  int min_travel_time = MIN_TRAVEL_TIME;
+  int min_travel_distance = MIN_TRAVEL_DISTANCE;
 
   // Main loop
   while (app_running) {
@@ -73,11 +73,11 @@ int main(int argc, const char *argv[]) {
     }
 
     // Core loop
-    if (min_travel_time <= 0) {
-      min_travel_time = MIN_TRAVEL_TIME;
+    if (min_travel_distance <= 0) {
+      min_travel_distance = MIN_TRAVEL_DISTANCE;
     }
 
-    if (rand() % 2 == 0 && min_travel_time == MIN_TRAVEL_TIME) {
+    if (rand() % 2 == 0 && min_travel_distance == MIN_TRAVEL_DISTANCE) {
       direction = gen_rand_direction();
     }
 
@@ -91,13 +91,14 @@ int main(int argc, const char *argv[]) {
       rect.x++;
     }
 
+    min_travel_distance--;
+
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &rect);
 
     // Update renderer, and frame related stuff
-    min_travel_time--;
     SDL_RenderPresent(renderer);
-    SDL_Delay(16);
+    SDL_Delay(17);
   }
   return 0;
 }
