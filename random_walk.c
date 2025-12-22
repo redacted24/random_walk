@@ -22,7 +22,7 @@ typedef struct {
   int v;
 } HSV;
 
-// Converts HSV to RGB. Better for picking "good" colors.
+// Converts HSL to RGB. Better for picking "good" colors.
 // Based on the color conversion formulae given by Wikipedia:
 // https://en.wikipedia.org/wiki/HSL_and_HSV#Color_conversion_formulae
 SDL_Color hsv2rgb(int hue, double saturation, double lightness) {
