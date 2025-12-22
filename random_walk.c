@@ -10,6 +10,12 @@
 #define HEIGHT 600
 #define MIN_TRAVEL_DISTANCE 5
 
+typedef struct {
+  int direction;
+  SDL_Rect rect;
+  SDL_Color color;
+} Node;
+
 // Generates a random double between 0 and 1.
 double gen_rand_double() { return (double)rand() / RAND_MAX; }
 
@@ -33,17 +39,19 @@ int gen_rand_direction() {
 }
 
 int main(int argc, const char *argv[]) {
-  srand(time(NULL));
+  srand(time(NULL)); // seed
   int num_node;
 
   if (argc == 1) {
-    num_node = 0;
+    num_node = 5;
   } else if (argc == 2) {
     num_node = atoi(argv[1]);
   } else {
     printf("Usage: %s <num-of-nodes>\n", argv[0]);
     return 1;
   }
+
+  Node node_list[num_node];
 
   // Create window
   SDL_Window *pwindow =
@@ -55,12 +63,19 @@ int main(int argc, const char *argv[]) {
   SDL_RenderClear(renderer);
 
   // Variables for Rect position
-  SDL_Rect rect = (SDL_Rect){450, 450, 2, 2};
+  SDL_Rect rect = (SDL_Rect){WIDTH / 2, HEIGHT / 2, 2, 2};
 
   // Some variables to initialize before main loop
   int app_running = 1;
   int direction = 0;
   int min_travel_distance = MIN_TRAVEL_DISTANCE;
+
+  for (int i = 0; i < num_node; i++) {
+    Node new_node = {gen_rand_direction(),
+                     {WIDTH / 2, HEIGHT / 2, 2, 2},
+                     {255, 255, 255, 255}};
+    node_list[i] = new_node;
+  }
 
   // Main loop
   while (app_running) {
@@ -78,23 +93,32 @@ int main(int argc, const char *argv[]) {
     }
 
     if (rand() % 2 == 0 && min_travel_distance == MIN_TRAVEL_DISTANCE) {
-      direction = gen_rand_direction();
+      for (int i = 0; i < num_node; i++) {
+        node_list[i].direction = gen_rand_direction();
+      }
     }
-
-    if (direction == 1) {
-      rect.y--;
-    } else if (direction == -2) {
-      rect.x--;
-    } else if (direction == -1) {
-      rect.y++;
-    } else if (direction == 2) {
-      rect.x++;
+    for (int i = 0; i < num_node; i++) {
+      direction = node_list[i].direction;
+      if (direction == 1) {
+        node_list[i].rect.y--;
+      } else if (direction == -2) {
+        node_list[i].rect.x--;
+      } else if (direction == -1) {
+        node_list[i].rect.y++;
+      } else if (direction == 2) {
+        node_list[i].rect.x++;
+      }
     }
 
     min_travel_distance--;
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, &rect);
+    // Draw all nodes
+    for (int i = 0; i < num_node; i++) {
+      Node *curr = &node_list[i];
+      SDL_SetRenderDrawColor(renderer, curr->color.r, curr->color.b,
+                             curr->color.g, curr->color.a);
+      SDL_RenderFillRect(renderer, &(curr->rect));
+    }
 
     // Update renderer, and frame related stuff
     SDL_RenderPresent(renderer);
