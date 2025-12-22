@@ -27,13 +27,9 @@ typedef struct {
 // https://en.wikipedia.org/wiki/HSL_and_HSV#Color_conversion_formulae
 SDL_Color hsv2rgb(int hue, double saturation, double lightness) {
   double chroma = (1 - fabs(2.0 * lightness - 1)) * saturation;
-  printf("chroma: %f\n", chroma);
   double hue_prime = (double)hue / 60;
-  printf("hueprime: %f\n", hue_prime);
   double x = chroma * (1 - fabs(fmod(hue_prime, 2) - 1));
-  printf("x: %f\n", x);
   double m = lightness - (chroma / 2);
-  printf("m: %f\n", m);
 
   double r1 = 0, g1 = 0, b1 = 0;
   if (0 <= hue_prime && hue_prime < 1) {
@@ -66,8 +62,6 @@ SDL_Color hsv2rgb(int hue, double saturation, double lightness) {
   int g = (g1 + m) * 255;
   int b = (b1 + m) * 255;
 
-  printf("end colors: %d, %d, %d\n", r, g, b);
-  printf("prime colors: %f, %f, %f\n", r1, g1, b1);
   SDL_Color color = {r, g, b, 255};
   return color;
 }
