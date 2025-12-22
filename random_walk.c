@@ -14,17 +14,21 @@
 double gen_rand_double() { return (double)rand() / RAND_MAX; }
 
 // Generates a random integer representing a direction for a node to take, based
-// on a random double value. 0: North 1: West 2: South 3: East
+// on a random double value.
+// 1: North
+// -1 : South
+// 2: East
+// -2: West
 int gen_rand_direction() {
   double random_value = gen_rand_double();
   if (random_value < 0.25) {
-    return 0;
-  } else if (random_value < 0.5) {
     return 1;
+  } else if (random_value < 0.5) {
+    return -1;
   } else if (random_value < 0.75) {
     return 2;
   } else {
-    return 3;
+    return -2;
   }
 }
 
@@ -51,7 +55,7 @@ int main(int argc, const char *argv[]) {
   SDL_RenderClear(renderer);
 
   // Variables for Rect position
-  SDL_Rect rect = (SDL_Rect){100, 100, 2, 2};
+  SDL_Rect rect = (SDL_Rect){450, 450, 2, 2};
 
   // Some variables to initialize before main loop
   int app_running = 1;
@@ -60,6 +64,7 @@ int main(int argc, const char *argv[]) {
 
   // Main loop
   while (app_running) {
+    // event handling
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) {
@@ -67,6 +72,7 @@ int main(int argc, const char *argv[]) {
       }
     }
 
+    // Core loop
     if (min_travel_time <= 0) {
       min_travel_time = MIN_TRAVEL_TIME;
     }
@@ -75,13 +81,13 @@ int main(int argc, const char *argv[]) {
       direction = gen_rand_direction();
     }
 
-    if (direction == 0) {
+    if (direction == 1) {
       rect.y--;
-    } else if (direction == 1) {
+    } else if (direction == -2) {
       rect.x--;
-    } else if (direction == 2) {
+    } else if (direction == -1) {
       rect.y++;
-    } else if (direction == 3) {
+    } else if (direction == 2) {
       rect.x++;
     }
 
@@ -91,7 +97,7 @@ int main(int argc, const char *argv[]) {
     // Update renderer, and frame related stuff
     min_travel_time--;
     SDL_RenderPresent(renderer);
-    SDL_Delay(20);
+    SDL_Delay(16);
   }
   return 0;
 }
