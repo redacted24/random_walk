@@ -16,16 +16,11 @@ typedef struct {
   SDL_Color color;
 } Node;
 
-typedef struct {
-  int h;
-  int s;
-  int v;
-} HSV;
-
-// Converts HSL to RGB. Better for picking "good" colors.
-// Based on the color conversion formulae given by Wikipedia:
+// Converts HSL to RGB. Better for picking "good" colors, because balance is
+// conserved across hues (compared to the RGB color space). Based on the color
+// The conversion formulae is given by Wikipedia:
 // https://en.wikipedia.org/wiki/HSL_and_HSV#Color_conversion_formulae
-SDL_Color hsv2rgb(int hue, double saturation, double lightness) {
+SDL_Color hsl2rgb(int hue, double saturation, double lightness) {
   double chroma = (1 - fabs(2.0 * lightness - 1)) * saturation;
   double hue_prime = (double)hue / 60;
   double x = chroma * (1 - fabs(fmod(hue_prime, 2) - 1));
@@ -66,17 +61,14 @@ SDL_Color hsv2rgb(int hue, double saturation, double lightness) {
   return color;
 }
 
-// Generates a random double between 0 and 1.
-double gen_rand_double() { return (double)rand() / RAND_MAX; }
-
 // Generates a random integer representing a direction for a node to take, based
 // on a random double value.
 // 0: North
-// 1 : South
+// 1: South
 // 2: East
 // 3: West
 int gen_rand_direction() {
-  double random_value = gen_rand_double();
+  double random_value = (double)rand() / RAND_MAX;
   if (random_value < 0.25) {
     return 0;
   } else if (random_value < 0.5) {
@@ -125,7 +117,7 @@ int main(int argc, const char *argv[]) {
   int hue = 0;
   int colors = 360 / num_node;
   for (int i = 0; i < num_node; i++) {
-    SDL_Color rand_color = hsv2rgb(hue, 0.5, 0.5);
+    SDL_Color rand_color = hsl2rgb(hue, 0.5, 0.5);
     hue += colors;
 
     Node new_node = {
@@ -170,7 +162,7 @@ int main(int argc, const char *argv[]) {
 
     min_travel_distance--;
 
-    // Draw all nodes
+    // Draw next position for all nodes
     for (int i = 0; i < num_node; i++) {
       Node *curr = &node_list[i];
       SDL_SetRenderDrawColor(renderer, curr->color.r, curr->color.b,
